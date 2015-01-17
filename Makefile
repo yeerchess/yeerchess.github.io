@@ -2,14 +2,15 @@ CONCAT = coffeescript-concat
 
 # Put coffeescript files here from bottom to top
 SERVER=
-SERVER+= src/canvas.coffee
-SERVER+= src/status_bar.coffee
-SERVER+= src/board.coffee
-SERVER+= src/unit.coffee
-SERVER+= src/websocket.coffee
-SERVER+= src/world.coffee
-SERVER+= src/event_handler.coffee
-SERVER+= src/main.coffee
+SERVER+= app/src/canvas.coffee
+SERVER+= app/src/status_bar.coffee
+SERVER+= app/src/board.coffee
+SERVER+= app/src/unit.coffee
+SERVER+= app/src/websocket.coffee
+SERVER+= app/src/world.coffee
+SERVER+= app/src/parser.coffee
+SERVER+= app/src/event_handler.coffee
+SERVER+= app/src/main.coffee
 
 
 .PHONY: all clean compile minify
@@ -23,7 +24,7 @@ clean:
 compile:
 	mkdir -p build/
 	@echo "> Compiling..."
-	$(CONCAT) ${SERVER} | coffee -sc > app.js
+	$(CONCAT) ${SERVER} | coffee -sc > app/app.js
 
 minify:
 	@echo "> Minifying..."
