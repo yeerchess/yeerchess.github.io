@@ -24,20 +24,15 @@ class World
         }
       )
 
-  select: (pos) ->
-    @hight_light(pos)
+  hover: (pos) ->
+    @default_cursor()
+    if @attack_points.length == 0
+      @hight_light(pos, false)
+    if @_included(@attack_points, pos) or @in_my_side(pos)
+      @pointer_cursor()
 
-  hight_light: (pos) ->
-    @unit_selected = false
-    @render()
-    for unit in @units
-      if unit.pos.x == pos.x and unit.pos.y == pos.y and unit.side == @my_side and @movable
-        unit.hight_light @canvas
-        attack_points = @_find_attack_points(unit)
-        @board.hight_light_attckable_points attack_points, @canvas
-        @attack_points = attack_points
-        @from_pos = pos
-        return
+  select: (pos) ->
+    @hight_light(pos, true)
     if @_included(@attack_points, pos)
       move =
         from_pos:
@@ -48,6 +43,45 @@ class World
       @ws.send json_str
       @attack_points = []
       @from_pos = null
+
+
+  pointer_cursor: () ->
+    @change_cursor_shape('pointer')
+
+  default_cursor: ()->
+    @change_cursor_shape('default')
+
+  change_cursor_shape: (shape) ->
+    document.body.style.cursor = shape
+
+  in_my_side: (pos) ->
+    for unit in @units
+      if unit.pos.x == pos.x and unit.pos.y == pos.y and unit.side == @my_side and @movable
+        return true
+    false
+
+
+  hight_light: (pos, need_to_show_range) ->
+    @default_cursor()
+    @render()
+    for unit in @units
+      if unit.pos.x == pos.x and unit.pos.y == pos.y and unit.side == @my_side and @movable
+        @pointer_cursor()
+        unit.hight_light @canvas
+        if need_to_show_range
+          @show_attack_range(unit)
+          return
+    # clear board when click empty space
+    if not @_included(@attack_points, pos)
+      @attack_points = []
+      @from_pos = null
+
+
+  show_attack_range: (unit) ->
+    attack_points = @_find_attack_points(unit)
+    @board.hight_light_attckable_points attack_points, @canvas
+    @attack_points = attack_points
+    @from_pos = unit.pos
 
 
   move_to: (point) ->

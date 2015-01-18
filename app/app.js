@@ -72,6 +72,15 @@
         pos = world.board.point2pos(clicked_point);
         return world.select(pos);
       });
+      $("#chess-board").mousemove(function(e) {
+        var clicked_point, pos;
+        clicked_point = {
+          x: e.offsetX,
+          y: e.offsetY
+        };
+        pos = world.board.point2pos(clicked_point);
+        return world.hover(pos);
+      });
     }
 
     return EventHandler;
@@ -176,26 +185,19 @@
       return _results;
     };
 
-    World.prototype.select = function(pos) {
-      return this.hight_light(pos);
+    World.prototype.hover = function(pos) {
+      this.default_cursor();
+      if (this.attack_points.length === 0) {
+        this.hight_light(pos, false);
+      }
+      if (this._included(this.attack_points, pos) || this.in_my_side(pos)) {
+        return this.pointer_cursor();
+      }
     };
 
-    World.prototype.hight_light = function(pos) {
-      var attack_points, json_str, move, unit, _i, _len, _ref;
-      this.unit_selected = false;
-      this.render();
-      _ref = this.units;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        unit = _ref[_i];
-        if (unit.pos.x === pos.x && unit.pos.y === pos.y && unit.side === this.my_side && this.movable) {
-          unit.hight_light(this.canvas);
-          attack_points = this._find_attack_points(unit);
-          this.board.hight_light_attckable_points(attack_points, this.canvas);
-          this.attack_points = attack_points;
-          this.from_pos = pos;
-          return;
-        }
-      }
+    World.prototype.select = function(pos) {
+      var json_str, move;
+      this.hight_light(pos, true);
       if (this._included(this.attack_points, pos)) {
         move = {
           from_pos: this.from_pos,
@@ -206,6 +208,60 @@
         this.attack_points = [];
         return this.from_pos = null;
       }
+    };
+
+    World.prototype.pointer_cursor = function() {
+      return this.change_cursor_shape('pointer');
+    };
+
+    World.prototype.default_cursor = function() {
+      return this.change_cursor_shape('default');
+    };
+
+    World.prototype.change_cursor_shape = function(shape) {
+      return document.body.style.cursor = shape;
+    };
+
+    World.prototype.in_my_side = function(pos) {
+      var unit, _i, _len, _ref;
+      _ref = this.units;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        unit = _ref[_i];
+        if (unit.pos.x === pos.x && unit.pos.y === pos.y && unit.side === this.my_side && this.movable) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    World.prototype.hight_light = function(pos, need_to_show_range) {
+      var unit, _i, _len, _ref;
+      this.default_cursor();
+      this.render();
+      _ref = this.units;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        unit = _ref[_i];
+        if (unit.pos.x === pos.x && unit.pos.y === pos.y && unit.side === this.my_side && this.movable) {
+          this.pointer_cursor();
+          unit.hight_light(this.canvas);
+          if (need_to_show_range) {
+            this.show_attack_range(unit);
+            return;
+          }
+        }
+      }
+      if (!this._included(this.attack_points, pos)) {
+        this.attack_points = [];
+        return this.from_pos = null;
+      }
+    };
+
+    World.prototype.show_attack_range = function(unit) {
+      var attack_points;
+      attack_points = this._find_attack_points(unit);
+      this.board.hight_light_attckable_points(attack_points, this.canvas);
+      this.attack_points = attack_points;
+      return this.from_pos = unit.pos;
     };
 
     World.prototype.move_to = function(point) {};

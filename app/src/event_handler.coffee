@@ -4,3 +4,9 @@ class EventHandler
       clicked_point = {x: e.offsetX, y:e.offsetY}
       pos = world.board.point2pos(clicked_point)
       world.select pos
+
+    $("#chess-board").mousemove (e) ->
+      clicked_point = {x: e.offsetX, y:e.offsetY}
+      pos = world.board.point2pos(clicked_point)
+      #console.log pos
+      world.hover pos
