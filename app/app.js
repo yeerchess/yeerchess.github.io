@@ -313,6 +313,11 @@
       if (game_state.state === STATE_BOARD_UPDATED) {
         this.world.init_units(game_state.boardInfo);
         this.world.render();
+        if (game_state.boardInfo.movable) {
+          this.status_bar.render("opponent moved, your turn now");
+        } else {
+          this.status_bar.render("you've moved, waiting opponent's move");
+        }
         return;
       }
       if (game_state.state === STATE_OPPOENENT_ABORT) {

@@ -29,6 +29,10 @@ class Parser
     if game_state.state == STATE_BOARD_UPDATED
       @world.init_units(game_state.boardInfo)
       @world.render()
+      if game_state.boardInfo.movable
+        @status_bar.render("opponent moved, your turn now")
+      else
+        @status_bar.render("you've moved, waiting opponent's move")
       return
 
     if game_state.state == STATE_OPPOENENT_ABORT
