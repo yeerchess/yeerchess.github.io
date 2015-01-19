@@ -207,9 +207,9 @@
 
   })();
 
-  WIDTH = 1200.0;
+  WIDTH = 900.0;
 
-  HEIGHT = 800.0;
+  HEIGHT = 900.0;
 
   getRatio = function() {
     var h, height, ratio, ratioh, ratiow, w, width;
@@ -301,11 +301,11 @@
       game_state = JSON.parse(data);
       console.log(game_state.state);
       if (game_state.state === STATE_WAIT) {
-        this.status_bar.render("waiting for another player");
+        this.status_bar.render("waiting for another player", "warning");
         return;
       }
       if (game_state.state === STATE_READY) {
-        this.status_bar.render("opponent found, game start!");
+        this.status_bar.render("opponent found, game start!", "info");
         this.world.init_units(game_state.boardInfo);
         this.world.render();
         return;
@@ -314,28 +314,26 @@
         this.world.init_units(game_state.boardInfo);
         this.world.render();
         if (game_state.boardInfo.movable) {
-          this.status_bar.render("opponent moved, your turn now");
+          this.status_bar.render("opponent moved, your turn now", "info");
         } else {
-          this.status_bar.render("you've moved, waiting opponent's move");
+          this.status_bar.render("you've moved, waiting opponent's move", "info");
         }
         return;
       }
       if (game_state.state === STATE_OPPOENENT_ABORT) {
-        this.status_bar.render("opponent leave suddenly, waiting for another player...");
+        this.status_bar.render("opponent leave suddenly, waiting for another player...", "warning");
         return;
       }
       if (game_state.state === STATE_GAMEOVER_WIN) {
         this.world.init_units(game_state.boardInfo);
         this.world.render();
-        this.status_bar.render("congraturations, you win!");
-        alert("congraturations, you win!");
+        this.status_bar.render("congraturations, you win!", "success");
         return;
       }
       if (game_state.state === STATE_GAMEOVER_LOSE) {
         this.world.init_units(game_state.boardInfo);
         this.world.render();
-        this.status_bar.render("oh, you lose...");
-        alert("oh, you lose...");
+        this.status_bar.render("oh, you lose...", "danger");
       }
     };
 
@@ -344,11 +342,18 @@
   })();
 
   StatusBar = (function() {
-    function StatusBar() {
-      console.log("super");
-    }
+    function StatusBar() {}
 
-    StatusBar.prototype.render = function(text) {
+    StatusBar.prototype.clear_class = function() {
+      $("#status-bar").removeClass("alert-info");
+      $("#status-bar").removeClass("alert-success");
+      $("#status-bar").removeClass("alert-warning");
+      return $("#status-bar").removeClass("alert-danger");
+    };
+
+    StatusBar.prototype.render = function(text, klass) {
+      this.clear_class();
+      $("#status-bar").addClass("alert-" + klass);
       return $("#status-bar").html(text);
     };
 
@@ -410,7 +415,7 @@
   Websocket = (function() {
     var WS_HOST;
 
-    WS_HOST = "ws://localhost:3000";
+    WS_HOST = "ws://ec2-54-65-78-87.ap-northeast-1.compute.amazonaws.com:3000";
 
     function Websocket(parser) {
       this.ws_conn = null;

@@ -17,11 +17,11 @@ class Parser
     game_state = JSON.parse(data);
     console.log game_state.state
     if game_state.state == STATE_WAIT
-      @status_bar.render("waiting for another player")
+      @status_bar.render("waiting for another player", "warning")
       return
 
     if game_state.state == STATE_READY
-      @status_bar.render("opponent found, game start!")
+      @status_bar.render("opponent found, game start!", "info")
       @world.init_units(game_state.boardInfo)
       @world.render()
       return
@@ -30,25 +30,23 @@ class Parser
       @world.init_units(game_state.boardInfo)
       @world.render()
       if game_state.boardInfo.movable
-        @status_bar.render("opponent moved, your turn now")
+        @status_bar.render("opponent moved, your turn now", "info")
       else
-        @status_bar.render("you've moved, waiting opponent's move")
+        @status_bar.render("you've moved, waiting opponent's move", "info")
       return
 
     if game_state.state == STATE_OPPOENENT_ABORT
-      @status_bar.render("opponent leave suddenly, waiting for another player...")
+      @status_bar.render("opponent leave suddenly, waiting for another player...", "warning")
       return
 
     if game_state.state == STATE_GAMEOVER_WIN
       @world.init_units(game_state.boardInfo)
       @world.render()
-      @status_bar.render("congraturations, you win!")
-      alert("congraturations, you win!")
+      @status_bar.render("congraturations, you win!", "success")
       return
 
     if game_state.state == STATE_GAMEOVER_LOSE
       @world.init_units(game_state.boardInfo)
       @world.render()
-      @status_bar.render("oh, you lose...")
-      alert("oh, you lose...")
+      @status_bar.render("oh, you lose...", "danger")
       return

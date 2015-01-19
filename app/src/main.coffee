@@ -1,5 +1,5 @@
-WIDTH = 1200.0
-HEIGHT = 800.0
+WIDTH = 900.0
+HEIGHT = 900.0
 getRatio = () ->
   width = WIDTH
   height = HEIGHT
