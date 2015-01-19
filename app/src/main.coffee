@@ -1,6 +1,8 @@
+WIDTH = 1200.0
+HEIGHT = 800.0
 getRatio = () ->
-  width = 1440.0
-  height = 800.0
+  width = WIDTH
+  height = HEIGHT
 
   w  = window.innerWidth
   h = window.innerHeight
@@ -29,8 +31,8 @@ setRatio = (width, height) ->
   return ratio
 
 getCanvas = () ->
-  width = 1440.0
-  height = 800.0
+  width = WIDTH
+  height = HEIGHT
 
   c = document.getElementById("chess-board")
   ctx = c.getContext("2d")
