@@ -301,7 +301,8 @@
       game_state = JSON.parse(data);
       console.log(game_state.state);
       if (game_state.state === STATE_WAIT) {
-        this.status_bar.render("waiting for another player", "warning");
+        this.status_bar.render("waiting for another player, copy url and invite your firend to play", "warning");
+        this.world.render();
         return;
       }
       if (game_state.state === STATE_READY) {
@@ -418,9 +419,27 @@
     WS_HOST = "ws://ec2-54-65-78-87.ap-northeast-1.compute.amazonaws.com:3000";
 
     function Websocket(parser) {
+      this.set_slug_and_url();
       this.ws_conn = null;
       this.parser = parser;
     }
+
+    Websocket.prototype.random_slug = function() {
+      return (Math.floor(Math.random() * 1000) + 1000).toString();
+    };
+
+    Websocket.prototype.set_slug_and_url = function() {
+      var array, currentUrl;
+      currentUrl = window.location.href;
+      array = currentUrl.split("?room=");
+      if (array.length < 2) {
+        this.slug = this.random_slug();
+        currentUrl += "?room=" + this.slug;
+      } else {
+        this.slug = array[1];
+      }
+      return window.history.pushState({}, 0, currentUrl);
+    };
 
     Websocket.prototype.connect = function() {
       var _parser;
@@ -428,7 +447,7 @@
         return;
       }
       _parser = this.parser;
-      this.ws_conn = new WebSocket(WS_HOST + "/ws");
+      this.ws_conn = new WebSocket(WS_HOST + "/ws/" + this.slug);
       this.ws_conn.onopen = function(data) {
         return console.log(data);
       };

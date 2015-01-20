@@ -17,7 +17,8 @@ class Parser
     game_state = JSON.parse(data);
     console.log game_state.state
     if game_state.state == STATE_WAIT
-      @status_bar.render("waiting for another player", "warning")
+      @status_bar.render("waiting for another player, copy url and invite your firend to play", "warning")
+      @world.render()
       return
 
     if game_state.state == STATE_READY
