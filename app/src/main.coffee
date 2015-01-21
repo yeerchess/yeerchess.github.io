@@ -1,11 +1,12 @@
-WIDTH = 900.0
-HEIGHT = 900.0
+WIDTH = 800.0
+HEIGHT = 800.0
+OFFSET = 200
 getRatio = () ->
   width = WIDTH
   height = HEIGHT
 
   w  = window.innerWidth
-  h = window.innerHeight
+  h = window.innerHeight - OFFSET
 
   ratiow = w/width
   ratioh = h/height
@@ -18,7 +19,7 @@ getRatio = () ->
 setRatio = (width, height) ->
   c = document.getElementById("chess-board")
   c.width  = window.innerWidth
-  c.height = window.innerHeight
+  c.height = window.innerHeight - OFFSET
 
   ratiow = c.width/width
   ratioh = c.height/height
