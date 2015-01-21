@@ -3,6 +3,7 @@
   <head>
     <title>Yeer Chess</title>
     <script language="javascript" src="lib/jquery.min.js" type="text/javascript"></script>
+    <script language="javascript" src="lib/bootstrap.min.js" type="text/javascript"></script>
     <script type="text/javascript" language="javascript" src="app/app.js"></script>
     <link rel="stylesheet" href="style/bootstrap.min.css">
   </head>
@@ -11,12 +12,12 @@
     <nav class="navbar navbar-default navbar-static-top">
       <div class="container">
         <div class="navbar-header">
-          <a class="navbar-brand" href="javascript://">Simple Chess</a>
+          <a class="navbar-brand" href="javascript://">Yeer Chess</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="javascript://">Help</a></li>
-            <li><a href="javascript://">About</a></li>
+            <li><a href="javascript://" data-toggle="modal" data-target="#help">Help</a></li>
+            <li><a href="javascript://" data-toggle="modal" data-target="#about">About</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -30,5 +31,70 @@
           Your browser does not support the HTML5 canvas tag.
         </canvas>
     </div> <!-- /container -->
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="help" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Game Rules</h4>
+          </div>
+          <div class="modal-body">
+            <h4>How to win?</h4>
+            <p>Piece "1" is your king, keep it safe and kill opponent's "1" to win.</p>
+
+            <h4>How to move?</h4>
+            <ul>
+              <li>
+                <p>The piece walks exactly(not less than) <strong>x</strong> steps, <strong>x</strong> is its number.</p>
+                <img src="http://pic.yupoo.com/athom/EnoU35g1/small.jpg">
+              </li>
+              <li>
+                <p>A step is a move form your current box to on of the neighbor boxes(left, right, up or down).</p>
+                <img src="http://pic.yupoo.com/athom/EnoU2tF2/small.jpg">
+              </li>
+              <li>
+                <p>When the middle of the walk path stands a friend piece or enemy piece, this path is invalid, you can not walk though that way.</p>
+                <img src="http://pic.yupoo.com/athom/EnoU1TwN/small.jpg">
+              </li>
+              <li>
+                <p>When the end of the walk path stands an enemy, enemy will be killed, no matter what number it is(that means your "2" can kill enemy's "3" althought 3 is bigger than 2).</p>
+                <img src="http://pic.yupoo.com/athom/EnoU25qC/small.jpg">
+              </li>
+              <li>
+                <p>You can not walk back to the position already visited in one movement.</p>
+                <img src="http://pic.yupoo.com/athom/EnoU1Eao/small.jpg">
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">About</h4>
+          </div>
+          <div class="modal-body">
+            <p>This game was invented in 2000 when I was 13 year's old.</p>
+            <p>The first version is 12 cutted erasers on paper.</p>
+            <p>Finaly I put it online and play it with my old friend thousand miles away, super happy :D</p>
+            <hr>
+            Author: <a href="https://twitter.com/yeerkunth">yeer</a>(yeerkunth@gmail.com)
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal end -->
+
   </body>
 </html>
