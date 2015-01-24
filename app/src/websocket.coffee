@@ -23,8 +23,16 @@ class Websocket
   connect: () ->
     if @ws_conn != null
       return
+    console.log "connected"
 
     _parser = @parser
+    _reconnect = @reconnect
+    self = this
+    _action = () ->
+      self.ws_conn = null
+      self.connect()
+
+
     @ws_conn = new WebSocket(WS_HOST + "/ws/" + @slug);
     @ws_conn.onopen = (data) ->
       console.log data
@@ -34,10 +42,22 @@ class Websocket
       _parser.parse data
 
     @ws_conn.onclose = (data) ->
+      #_reconnect(_action)
       alert("close")
 
     @ws_conn.onerror = (data) ->
       alert "error"
+
+
+  reconnect_action: () ->
+    @ws_conn = null
+    @connect()
+
+  reconnect: (action) ->
+    #debugger
+    setTimeout(action, Math.floor(Math.random() * 5001) + 1000);
+
+
 
   send: (data) ->
     @ws_conn.send(data)

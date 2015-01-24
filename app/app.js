@@ -444,11 +444,18 @@
     };
 
     Websocket.prototype.connect = function() {
-      var _parser;
+      var self, _action, _parser, _reconnect;
       if (this.ws_conn !== null) {
         return;
       }
+      console.log("connected");
       _parser = this.parser;
+      _reconnect = this.reconnect;
+      self = this;
+      _action = function() {
+        self.ws_conn = null;
+        return self.connect();
+      };
       this.ws_conn = new WebSocket(WS_HOST + "/ws/" + this.slug);
       this.ws_conn.onopen = function(data) {
         return console.log(data);
@@ -464,6 +471,15 @@
       return this.ws_conn.onerror = function(data) {
         return alert("error");
       };
+    };
+
+    Websocket.prototype.reconnect_action = function() {
+      this.ws_conn = null;
+      return this.connect();
+    };
+
+    Websocket.prototype.reconnect = function(action) {
+      return setTimeout(action, Math.floor(Math.random() * 5001) + 1000);
     };
 
     Websocket.prototype.send = function(data) {
