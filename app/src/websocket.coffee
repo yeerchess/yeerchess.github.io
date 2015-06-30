@@ -1,6 +1,7 @@
 class Websocket
   #WS_HOST = "ws://localhost:3000"
   WS_HOST = "ws://ec2-52-74-37-229.ap-southeast-1.compute.amazonaws.com:3000"
+
   constructor: (parser) ->
     @set_slug_and_url()
     @ws_conn = null
