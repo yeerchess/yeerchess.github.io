@@ -418,7 +418,7 @@
   Websocket = (function() {
     var WS_HOST;
 
-    WS_HOST = "ws://ec2-54-65-78-87.ap-northeast-1.compute.amazonaws.com:3000";
+    WS_HOST = "ws://ec2-52-74-37-229.ap-southeast-1.compute.amazonaws.com:3000";
 
     function Websocket(parser) {
       this.set_slug_and_url();
