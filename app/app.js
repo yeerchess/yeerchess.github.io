@@ -2,211 +2,6 @@
 (function() {
   var Board, Canvas, EventHandler, HEIGHT, OFFSET, Parser, StatusBar, Unit, WIDTH, Websocket, World, getCanvas, getRatio, main, setRatio;
 
-  Board = (function() {
-    var COLOR_ATTACK, COLOR_BORDER, COLOR_LINE, HEIGHT, WIDTH;
-
-    WIDTH = 600;
-
-    HEIGHT = 600;
-
-    COLOR_BORDER = 'RGB(100, 0, 240)';
-
-    COLOR_LINE = 'RGB(100, 0, 240)';
-
-    COLOR_ATTACK = 'RGBA(264, 224, 126, 0.4)';
-
-    function Board(size) {
-      this.size = size;
-    }
-
-    Board.prototype.radius = function() {
-      return WIDTH / this.size / 2.0 - 3;
-    };
-
-    Board.prototype.point2pos = function(point) {
-      var base_x, base_y, h, heightUnit, ratio, w, widthUnit, x, xx, y, yy;
-      ratio = getRatio();
-      w = $("#chess-board").width();
-      h = $("#chess-board").height();
-      base_x = w / 2 - WIDTH / 2 * ratio;
-      base_y = h / 2 - HEIGHT / 2 * ratio;
-      x = point.x - base_x - WIDTH / 2 * ratio;
-      y = point.y - base_y - HEIGHT / 2 * ratio;
-      if (x < -WIDTH / 2 * ratio || x > WIDTH / 2 * ratio) {
-        return {
-          x: -1,
-          y: -1
-        };
-      }
-      if (y < -HEIGHT / 2 * ratio || y > HEIGHT / 2 * ratio) {
-        return {
-          x: -1,
-          y: -1
-        };
-      }
-      widthUnit = WIDTH * ratio / this.size;
-      heightUnit = HEIGHT * ratio / this.size;
-      xx = x / widthUnit + this.size / 2;
-      yy = -(y / heightUnit) + this.size / 2;
-      return {
-        x: Math.floor(xx),
-        y: Math.floor(yy)
-      };
-    };
-
-    Board.prototype.position2point = function(pos) {
-      var heightUnit, widthUnit, x, y;
-      if (pos.x < 0 || pos.x >= this.size || pos.y < 0 || pos.y >= this.size) {
-        return {
-          x: -1,
-          y: -1
-        };
-      }
-      widthUnit = WIDTH / this.size;
-      heightUnit = HEIGHT / this.size;
-      x = -WIDTH / 2 + pos.x * widthUnit + widthUnit / 2;
-      y = -HEIGHT / 2 + pos.y * heightUnit + heightUnit / 2;
-      return {
-        x: x,
-        y: -y
-      };
-    };
-
-    Board.prototype.hight_light_attckable_points = function(ps, canvas) {
-      var field, heightUnit, point, pos, widthUnit, _i, _len, _results;
-      widthUnit = WIDTH / this.size;
-      heightUnit = HEIGHT / this.size;
-      _results = [];
-      for (_i = 0, _len = ps.length; _i < _len; _i++) {
-        pos = ps[_i];
-        point = this.position2point(pos);
-        field = {
-          x: point.x - widthUnit / 2,
-          y: point.y - heightUnit / 2,
-          w: widthUnit,
-          h: heightUnit
-        };
-        _results.push(canvas.fillRect(COLOR_ATTACK, field));
-      }
-      return _results;
-    };
-
-    Board.prototype.render = function(canvas) {
-      var heightUnit, i, widthUnit, x1, y1, _i, _ref, _results;
-      canvas.drawRect(COLOR_BORDER, {
-        x: -WIDTH / 2,
-        y: -HEIGHT / 2,
-        w: WIDTH,
-        h: HEIGHT
-      });
-      widthUnit = WIDTH / this.size;
-      heightUnit = HEIGHT / this.size;
-      _results = [];
-      for (i = _i = 1, _ref = this.size; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
-        i = i - this.size / 2;
-        x1 = i * widthUnit;
-        y1 = i * heightUnit;
-        canvas.drawLine(COLOR_BORDER, x1, -HEIGHT / 2, x1, HEIGHT / 2);
-        _results.push(canvas.drawLine(COLOR_BORDER, -HEIGHT / 2, y1, HEIGHT / 2, y1));
-      }
-      return _results;
-    };
-
-    return Board;
-
-  })();
-
-  Canvas = function(ctx, w, h) {
-    this.ctx = ctx;
-    this.w = w;
-    return this.h = h;
-  };
-
-  Canvas.prototype.fillRect = function(color, rect) {
-    this.ctx.fillStyle = color;
-    return this.ctx.fillRect(this.xscreen(rect.x), this.yscreen(rect.y), rect.w, rect.h);
-  };
-
-  Canvas.prototype.drawRect = function(color, rect) {
-    this.ctx.strokeStyle = color;
-    return this.ctx.strokeRect(this.xscreen(rect.x), this.yscreen(rect.y), rect.w, rect.h);
-  };
-
-  Canvas.prototype.drawLine = function(color, sx, sy, ex, ey) {
-    this.ctx.strokeStyle = color;
-    this.ctx.beginPath();
-    this.ctx.moveTo(this.xscreen(sx), this.yscreen(sy));
-    this.ctx.lineTo(this.xscreen(ex), this.yscreen(ey));
-    return this.ctx.stroke();
-  };
-
-  Canvas.prototype.drawArc = function(color, x, y, r, sAngle, eAngle) {
-    this.ctx.strokeStyle = color;
-    this.ctx.beginPath();
-    this.ctx.arc(this.xscreen(x), this.yscreen(y), r, sAngle, eAngle);
-    return this.ctx.stroke();
-  };
-
-  Canvas.prototype.fillArc = function(color, x, y, r, sAngle, eAngle) {
-    this.ctx.fillStyle = color;
-    this.ctx.beginPath();
-    this.ctx.arc(this.xscreen(x), this.yscreen(y), r, sAngle, eAngle);
-    return this.ctx.fill();
-  };
-
-  Canvas.prototype.drawCircle = function(color, x, y, r) {
-    return this.drawArc(color, x, y, r, 0, 2 * Math.PI);
-  };
-
-  Canvas.prototype.fillCircle = function(color, x, y, r) {
-    return this.fillArc(color, x, y, r, 0, 2 * Math.PI);
-  };
-
-  Canvas.prototype.drawText = function(color, font, text, x, y) {
-    this.ctx.fillStyle = color;
-    this.ctx.font = font;
-    x = x - this.ctx.measureText(text).width / 2;
-    return this.ctx.fillText(text, this.xscreen(x), this.yscreen(y));
-  };
-
-  Canvas.prototype.clear = function() {
-    return this.ctx.clearRect(0, 0, this.w, this.h);
-  };
-
-  Canvas.prototype.xscreen = function(x) {
-    return x + this.w / 2;
-  };
-
-  Canvas.prototype.yscreen = function(y) {
-    return y + this.h / 2;
-  };
-
-  EventHandler = (function() {
-    function EventHandler(world) {
-      $("#chess-board").click(function(e) {
-        var clicked_point, pos;
-        clicked_point = {
-          x: e.offsetX,
-          y: e.offsetY
-        };
-        pos = world.board.point2pos(clicked_point);
-        return world.select(pos);
-      });
-      $("#chess-board").mousemove(function(e) {
-        var clicked_point, pos;
-        clicked_point = {
-          x: e.offsetX,
-          y: e.offsetY
-        };
-        pos = world.board.point2pos(clicked_point);
-        return world.hover(pos);
-      });
-    }
-
-    return EventHandler;
-
-  })();
-
   WIDTH = 800.0;
 
   HEIGHT = 800.0;
@@ -271,6 +66,32 @@
   $(function() {
     return main();
   });
+
+  EventHandler = (function() {
+    function EventHandler(world) {
+      $("#chess-board").click(function(e) {
+        var clicked_point, pos;
+        clicked_point = {
+          x: e.offsetX,
+          y: e.offsetY
+        };
+        pos = world.board.point2pos(clicked_point);
+        return world.select(pos);
+      });
+      $("#chess-board").mousemove(function(e) {
+        var clicked_point, pos;
+        clicked_point = {
+          x: e.offsetX,
+          y: e.offsetY
+        };
+        pos = world.board.point2pos(clicked_point);
+        return world.hover(pos);
+      });
+    }
+
+    return EventHandler;
+
+  })();
 
   Parser = (function() {
     var STATE_BOARD_UPDATED, STATE_GAMEOVER_FOR_WATCHER, STATE_GAMEOVER_LOSE, STATE_GAMEOVER_WIN, STATE_ILLEGAL_OPERATION, STATE_OPPOENENT_ABORT, STATE_OPPOENENT_GIVEUP, STATE_READY, STATE_WAIT;
@@ -341,152 +162,6 @@
     };
 
     return Parser;
-
-  })();
-
-  StatusBar = (function() {
-    function StatusBar() {}
-
-    StatusBar.prototype.clear_class = function() {
-      $("#status-bar").removeClass("alert-info");
-      $("#status-bar").removeClass("alert-success");
-      $("#status-bar").removeClass("alert-warning");
-      return $("#status-bar").removeClass("alert-danger");
-    };
-
-    StatusBar.prototype.render = function(text, klass) {
-      this.clear_class();
-      $("#status-bar").addClass("alert-" + klass);
-      return $("#status-bar").html(text);
-    };
-
-    return StatusBar;
-
-  })();
-
-  Unit = (function() {
-    var COLOR_CIRCLE, COLOR_UNIT_BLACK, COLOR_UNIT_GREEN, COLOR_UNIT_RED, COLOR_UNIT_WHITE;
-
-    COLOR_CIRCLE = 'RGB(244, 122, 2)';
-
-    COLOR_UNIT_BLACK = 'RGB(0, 0, 0)';
-
-    COLOR_UNIT_WHITE = 'RGB(255, 255, 255)';
-
-    COLOR_UNIT_GREEN = 'RGB(0, 255, 0)';
-
-    COLOR_UNIT_RED = 'RGB(255, 0, 0)';
-
-    function Unit(board, side, value, pos) {
-      this.board = board;
-      this.side = side;
-      this.value = value;
-      this.pos = pos;
-    }
-
-    Unit.prototype.hight_light = function(canvas) {
-      var point, r;
-      point = this.board.position2point(this.pos);
-      r = this.board.radius();
-      if (this.side === 1) {
-        canvas.fillCircle(COLOR_UNIT_GREEN, point.x, point.y, r);
-        return canvas.drawText(COLOR_UNIT_WHITE, "80px Arial", this.value, point.x, point.y + 30);
-      } else {
-        canvas.fillCircle(COLOR_UNIT_RED, point.x, point.y, r);
-        return canvas.drawText(COLOR_UNIT_BLACK, "80px Arial", this.value, point.x, point.y + 30);
-      }
-    };
-
-    Unit.prototype.render = function(canvas) {
-      var point, r;
-      point = this.board.position2point(this.pos);
-      r = this.board.radius();
-      if (this.side === 1) {
-        canvas.drawCircle(COLOR_CIRCLE, point.x, point.y, r);
-        canvas.fillCircle(COLOR_UNIT_BLACK, point.x, point.y, r);
-        return canvas.drawText(COLOR_UNIT_WHITE, "80px Arial", this.value, point.x, point.y + 30);
-      } else {
-        canvas.drawCircle(COLOR_CIRCLE, point.x, point.y, r);
-        return canvas.drawText(COLOR_UNIT_BLACK, "80px Arial", this.value, point.x, point.y + 30);
-      }
-    };
-
-    return Unit;
-
-  })();
-
-  Websocket = (function() {
-    var WS_HOST;
-
-    WS_HOST = "ws://ec2-52-74-37-229.ap-southeast-1.compute.amazonaws.com:3000";
-
-    function Websocket(parser) {
-      this.set_slug_and_url();
-      this.ws_conn = null;
-      this.parser = parser;
-    }
-
-    Websocket.prototype.random_slug = function() {
-      return (Math.floor(Math.random() * 1000) + 1000).toString();
-    };
-
-    Websocket.prototype.set_slug_and_url = function() {
-      var array, currentUrl;
-      currentUrl = window.location.href;
-      array = currentUrl.split("?room=");
-      if (array.length < 2) {
-        this.slug = this.random_slug();
-        currentUrl += "?room=" + this.slug;
-      } else {
-        this.slug = array[1];
-      }
-      return window.history.pushState({}, 0, currentUrl);
-    };
-
-    Websocket.prototype.connect = function() {
-      var self, _action, _parser, _reconnect;
-      if (this.ws_conn !== null) {
-        return;
-      }
-      console.log("connected");
-      _parser = this.parser;
-      _reconnect = this.reconnect;
-      self = this;
-      _action = function() {
-        self.ws_conn = null;
-        return self.connect();
-      };
-      this.ws_conn = new WebSocket(WS_HOST + "/ws/" + this.slug);
-      this.ws_conn.onopen = function(data) {
-        return console.log(data);
-      };
-      this.ws_conn.onmessage = function(msg_event) {
-        var data;
-        data = msg_event.data;
-        return _parser.parse(data);
-      };
-      this.ws_conn.onclose = function(data) {
-        return alert("close");
-      };
-      return this.ws_conn.onerror = function(data) {
-        return alert("error");
-      };
-    };
-
-    Websocket.prototype.reconnect_action = function() {
-      this.ws_conn = null;
-      return this.connect();
-    };
-
-    Websocket.prototype.reconnect = function(action) {
-      return setTimeout(action, Math.floor(Math.random() * 5001) + 1000);
-    };
-
-    Websocket.prototype.send = function(data) {
-      return this.ws_conn.send(data);
-    };
-
-    return Websocket;
 
   })();
 
@@ -979,5 +654,330 @@
     return World;
 
   })();
+
+  Websocket = (function() {
+    var WS_HOST;
+
+    WS_HOST = "ws://athom-chess.daoapp.io";
+
+    function Websocket(parser) {
+      this.set_slug_and_url();
+      this.ws_conn = null;
+      this.parser = parser;
+    }
+
+    Websocket.prototype.random_slug = function() {
+      return (Math.floor(Math.random() * 1000) + 1000).toString();
+    };
+
+    Websocket.prototype.set_slug_and_url = function() {
+      var array, currentUrl;
+      currentUrl = window.location.href;
+      array = currentUrl.split("?room=");
+      if (array.length < 2) {
+        this.slug = this.random_slug();
+        currentUrl += "?room=" + this.slug;
+      } else {
+        this.slug = array[1];
+      }
+      return window.history.pushState({}, 0, currentUrl);
+    };
+
+    Websocket.prototype.connect = function() {
+      var self, _action, _parser, _reconnect;
+      if (this.ws_conn !== null) {
+        return;
+      }
+      console.log("connected");
+      _parser = this.parser;
+      _reconnect = this.reconnect;
+      self = this;
+      _action = function() {
+        self.ws_conn = null;
+        return self.connect();
+      };
+      this.ws_conn = new WebSocket(WS_HOST + "/ws/" + this.slug);
+      this.ws_conn.onopen = function(data) {
+        return console.log(data);
+      };
+      this.ws_conn.onmessage = function(msg_event) {
+        var data;
+        data = msg_event.data;
+        return _parser.parse(data);
+      };
+      this.ws_conn.onclose = function(data) {
+        return alert("close");
+      };
+      return this.ws_conn.onerror = function(data) {
+        return alert("error");
+      };
+    };
+
+    Websocket.prototype.reconnect_action = function() {
+      this.ws_conn = null;
+      return this.connect();
+    };
+
+    Websocket.prototype.reconnect = function(action) {
+      return setTimeout(action, Math.floor(Math.random() * 5001) + 1000);
+    };
+
+    Websocket.prototype.send = function(data) {
+      return this.ws_conn.send(data);
+    };
+
+    return Websocket;
+
+  })();
+
+  Unit = (function() {
+    var COLOR_CIRCLE, COLOR_UNIT_BLACK, COLOR_UNIT_GREEN, COLOR_UNIT_RED, COLOR_UNIT_WHITE;
+
+    COLOR_CIRCLE = 'RGB(244, 122, 2)';
+
+    COLOR_UNIT_BLACK = 'RGB(0, 0, 0)';
+
+    COLOR_UNIT_WHITE = 'RGB(255, 255, 255)';
+
+    COLOR_UNIT_GREEN = 'RGB(0, 255, 0)';
+
+    COLOR_UNIT_RED = 'RGB(255, 0, 0)';
+
+    function Unit(board, side, value, pos) {
+      this.board = board;
+      this.side = side;
+      this.value = value;
+      this.pos = pos;
+    }
+
+    Unit.prototype.hight_light = function(canvas) {
+      var point, r;
+      point = this.board.position2point(this.pos);
+      r = this.board.radius();
+      if (this.side === 1) {
+        canvas.fillCircle(COLOR_UNIT_GREEN, point.x, point.y, r);
+        return canvas.drawText(COLOR_UNIT_WHITE, "80px Arial", this.value, point.x, point.y + 30);
+      } else {
+        canvas.fillCircle(COLOR_UNIT_RED, point.x, point.y, r);
+        return canvas.drawText(COLOR_UNIT_BLACK, "80px Arial", this.value, point.x, point.y + 30);
+      }
+    };
+
+    Unit.prototype.render = function(canvas) {
+      var point, r;
+      point = this.board.position2point(this.pos);
+      r = this.board.radius();
+      if (this.side === 1) {
+        canvas.drawCircle(COLOR_CIRCLE, point.x, point.y, r);
+        canvas.fillCircle(COLOR_UNIT_BLACK, point.x, point.y, r);
+        return canvas.drawText(COLOR_UNIT_WHITE, "80px Arial", this.value, point.x, point.y + 30);
+      } else {
+        canvas.drawCircle(COLOR_CIRCLE, point.x, point.y, r);
+        return canvas.drawText(COLOR_UNIT_BLACK, "80px Arial", this.value, point.x, point.y + 30);
+      }
+    };
+
+    return Unit;
+
+  })();
+
+  Board = (function() {
+    var COLOR_ATTACK, COLOR_BORDER, COLOR_LINE;
+
+    WIDTH = 600;
+
+    HEIGHT = 600;
+
+    COLOR_BORDER = 'RGB(100, 0, 240)';
+
+    COLOR_LINE = 'RGB(100, 0, 240)';
+
+    COLOR_ATTACK = 'RGBA(264, 224, 126, 0.4)';
+
+    function Board(size) {
+      this.size = size;
+    }
+
+    Board.prototype.radius = function() {
+      return WIDTH / this.size / 2.0 - 3;
+    };
+
+    Board.prototype.point2pos = function(point) {
+      var base_x, base_y, h, heightUnit, ratio, w, widthUnit, x, xx, y, yy;
+      ratio = getRatio();
+      w = $("#chess-board").width();
+      h = $("#chess-board").height();
+      base_x = w / 2 - WIDTH / 2 * ratio;
+      base_y = h / 2 - HEIGHT / 2 * ratio;
+      x = point.x - base_x - WIDTH / 2 * ratio;
+      y = point.y - base_y - HEIGHT / 2 * ratio;
+      if (x < -WIDTH / 2 * ratio || x > WIDTH / 2 * ratio) {
+        return {
+          x: -1,
+          y: -1
+        };
+      }
+      if (y < -HEIGHT / 2 * ratio || y > HEIGHT / 2 * ratio) {
+        return {
+          x: -1,
+          y: -1
+        };
+      }
+      widthUnit = WIDTH * ratio / this.size;
+      heightUnit = HEIGHT * ratio / this.size;
+      xx = x / widthUnit + this.size / 2;
+      yy = -(y / heightUnit) + this.size / 2;
+      return {
+        x: Math.floor(xx),
+        y: Math.floor(yy)
+      };
+    };
+
+    Board.prototype.position2point = function(pos) {
+      var heightUnit, widthUnit, x, y;
+      if (pos.x < 0 || pos.x >= this.size || pos.y < 0 || pos.y >= this.size) {
+        return {
+          x: -1,
+          y: -1
+        };
+      }
+      widthUnit = WIDTH / this.size;
+      heightUnit = HEIGHT / this.size;
+      x = -WIDTH / 2 + pos.x * widthUnit + widthUnit / 2;
+      y = -HEIGHT / 2 + pos.y * heightUnit + heightUnit / 2;
+      return {
+        x: x,
+        y: -y
+      };
+    };
+
+    Board.prototype.hight_light_attckable_points = function(ps, canvas) {
+      var field, heightUnit, point, pos, widthUnit, _i, _len, _results;
+      widthUnit = WIDTH / this.size;
+      heightUnit = HEIGHT / this.size;
+      _results = [];
+      for (_i = 0, _len = ps.length; _i < _len; _i++) {
+        pos = ps[_i];
+        point = this.position2point(pos);
+        field = {
+          x: point.x - widthUnit / 2,
+          y: point.y - heightUnit / 2,
+          w: widthUnit,
+          h: heightUnit
+        };
+        _results.push(canvas.fillRect(COLOR_ATTACK, field));
+      }
+      return _results;
+    };
+
+    Board.prototype.render = function(canvas) {
+      var heightUnit, i, widthUnit, x1, y1, _i, _ref, _results;
+      canvas.drawRect(COLOR_BORDER, {
+        x: -WIDTH / 2,
+        y: -HEIGHT / 2,
+        w: WIDTH,
+        h: HEIGHT
+      });
+      widthUnit = WIDTH / this.size;
+      heightUnit = HEIGHT / this.size;
+      _results = [];
+      for (i = _i = 1, _ref = this.size; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
+        i = i - this.size / 2;
+        x1 = i * widthUnit;
+        y1 = i * heightUnit;
+        canvas.drawLine(COLOR_BORDER, x1, -HEIGHT / 2, x1, HEIGHT / 2);
+        _results.push(canvas.drawLine(COLOR_BORDER, -HEIGHT / 2, y1, HEIGHT / 2, y1));
+      }
+      return _results;
+    };
+
+    return Board;
+
+  })();
+
+  StatusBar = (function() {
+    function StatusBar() {}
+
+    StatusBar.prototype.clear_class = function() {
+      $("#status-bar").removeClass("alert-info");
+      $("#status-bar").removeClass("alert-success");
+      $("#status-bar").removeClass("alert-warning");
+      return $("#status-bar").removeClass("alert-danger");
+    };
+
+    StatusBar.prototype.render = function(text, klass) {
+      this.clear_class();
+      $("#status-bar").addClass("alert-" + klass);
+      return $("#status-bar").html(text);
+    };
+
+    return StatusBar;
+
+  })();
+
+  Canvas = function(ctx, w, h) {
+    this.ctx = ctx;
+    this.w = w;
+    return this.h = h;
+  };
+
+  Canvas.prototype.fillRect = function(color, rect) {
+    this.ctx.fillStyle = color;
+    return this.ctx.fillRect(this.xscreen(rect.x), this.yscreen(rect.y), rect.w, rect.h);
+  };
+
+  Canvas.prototype.drawRect = function(color, rect) {
+    this.ctx.strokeStyle = color;
+    return this.ctx.strokeRect(this.xscreen(rect.x), this.yscreen(rect.y), rect.w, rect.h);
+  };
+
+  Canvas.prototype.drawLine = function(color, sx, sy, ex, ey) {
+    this.ctx.strokeStyle = color;
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.xscreen(sx), this.yscreen(sy));
+    this.ctx.lineTo(this.xscreen(ex), this.yscreen(ey));
+    return this.ctx.stroke();
+  };
+
+  Canvas.prototype.drawArc = function(color, x, y, r, sAngle, eAngle) {
+    this.ctx.strokeStyle = color;
+    this.ctx.beginPath();
+    this.ctx.arc(this.xscreen(x), this.yscreen(y), r, sAngle, eAngle);
+    return this.ctx.stroke();
+  };
+
+  Canvas.prototype.fillArc = function(color, x, y, r, sAngle, eAngle) {
+    this.ctx.fillStyle = color;
+    this.ctx.beginPath();
+    this.ctx.arc(this.xscreen(x), this.yscreen(y), r, sAngle, eAngle);
+    return this.ctx.fill();
+  };
+
+  Canvas.prototype.drawCircle = function(color, x, y, r) {
+    return this.drawArc(color, x, y, r, 0, 2 * Math.PI);
+  };
+
+  Canvas.prototype.fillCircle = function(color, x, y, r) {
+    return this.fillArc(color, x, y, r, 0, 2 * Math.PI);
+  };
+
+  Canvas.prototype.drawText = function(color, font, text, x, y) {
+    this.ctx.fillStyle = color;
+    this.ctx.font = font;
+    x = x - this.ctx.measureText(text).width / 2;
+    return this.ctx.fillText(text, this.xscreen(x), this.yscreen(y));
+  };
+
+  Canvas.prototype.clear = function() {
+    return this.ctx.clearRect(0, 0, this.w, this.h);
+  };
+
+  Canvas.prototype.xscreen = function(x) {
+    return x + this.w / 2;
+  };
+
+  Canvas.prototype.yscreen = function(y) {
+    return y + this.h / 2;
+  };
 
 }).call(this);
