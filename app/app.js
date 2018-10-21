@@ -659,6 +659,7 @@
     var WS_HOST;
 
     WS_HOST = "ws://athom-chess.daoapp.io";
+    WS_HOST = "ws://119.28.86.93";
 
     function Websocket(parser) {
       this.set_slug_and_url();
